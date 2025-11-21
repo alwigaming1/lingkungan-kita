@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Admin - Lingkungan Kita</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 1rem;
+        }
+        
+        .login-card {
+            background: var(--white);
+            padding: 2.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .login-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .login-info {
+            background: var(--light);
+            padding: 1rem;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: left;
+        }
+        
+        .debug-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 1rem;
+            border-radius: var(--radius);
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: #856404;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-logo">
+                <span class="login-logo-icon">🌱</span>
+                <span>LingkunganKita</span>
+            </div>
+            
+            <h1 class="login-title">Panel Administrator</h1>
+            <p class="login-subtitle">Masuk untuk mengelola laporan lingkungan</p>
+
+            <div class="login-info">
+                <strong>Demo Login:</strong><br>
+                Email: admin@lingkungankita.id<br>
+                Password: admin123
+            </div>
+            
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control" id="email" placeholder="Masukkan email" required value="admin@lingkungankita.id">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" placeholder="Masukkan password" required value="admin123">
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%;" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Masuk
+                </button>
+
+                <div id="loginMessage" style="margin-top: 1rem; display: none;"></div>
+            </form>
+            
+            <div class="debug-info" id="debugInfo">
+                <strong>Debug Info:</strong><br>
+                <span id="firebaseStatus">Checking Firebase...</span>
+            </div>
+
+            <div class="back-to-home">
+                <a href="index.html">
+                    <i class="fas fa-arrow-left"></i>
+                    Kembali ke Halaman Utama
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK - HARUS DIPASANG SEBELUM firebase-config.js -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+    
+    <script>
+        // Debug function to check Firebase status
+        function checkFirebaseStatus() {
+            const debugInfo = document.getElementById('firebaseStatus');
+            
+            try {
+                if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+                    debugInfo.innerHTML = '✅ Firebase berhasil diinisialisasi';
+                    debugInfo.style.color = 'green';
+                } else {
+                    debugInfo.innerHTML = '❌ Firebase gagal diinisialisasi';
+                    debugInfo.style.color = 'red';
+                }
+            } catch (error) {
+                debugInfo.innerHTML = '❌ Error: ' + error.message;
+                debugInfo.style.color = 'red';
+            }
+        }
+
+        // Check Firebase status when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            checkFirebaseStatus();
+            
+            // Check again after a short delay to ensure Firebase is loaded
+            setTimeout(checkFirebaseStatus, 1000);
+        });
+
+        // Login functionality
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const messageDiv = document.getElementById('loginMessage');
+            
+            // Show loading
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+            loginBtn.disabled = true;
+            messageDiv.style.display = 'none';
+            
+            try {
+                console.log('Attempting login with:', email);
+                
+                // Check if Firebase is available
+                if (typeof firebase === 'undefined') {
+                    throw new Error('Firebase SDK tidak terload');
+                }
+                
+                if (!firebase.apps.length) {
+                    throw new Error('Firebase app belum diinisialisasi');
+                }
+                
+                const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                console.log('Login successful:', user.email);
+                
+                // Redirect to admin panel
+                window.location.href = 'admin.html';
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                
+                // Show detailed error message
+                let errorMessage = error.message;
+                if (error.code === 'auth/user-not-found') {
+                    errorMessage = 'User tidak ditemukan. Pastikan email benar.';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMessage = 'Password salah.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Format email tidak valid.';
+                }
+                
+                messageDiv.style.display = 'block';
+                messageDiv.innerHTML = `
+                    <div style="background: var(--danger); color: white; padding: 0.75rem; border-radius: 8px;">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        Login gagal: ${errorMessage}
+                    </div>
+                `;
+                
+                // Reset button
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk';
+                loginBtn.disabled = false;
+            }
+        });
+
+        // Check auth state
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                console.log('User already logged in:', user.email);
+                window.location.href = 'admin.html';
+            }
+        });
+    </script>
+</body>
+</html>

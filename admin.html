@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin - Lingkungan Kita</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="admin-body">
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <span class="logo-icon">🌱</span>
+            <span>LingkunganKita - Admin</span>
+        </div>
+        <div class="nav-buttons">
+            <span class="admin-welcome">
+                <i class="fas fa-user-circle"></i>
+                <span id="adminUsername">Loading...</span>
+            </span>
+            <a href="index.html" class="btn btn-outline">
+                <i class="fas fa-home"></i>
+                <span class="text">Halaman Utama</span>
+            </a>
+            <button class="btn btn-primary" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span class="text">Keluar</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Loading Screen -->
+    <div id="loadingScreen" style="display: flex; justify-content: center; align-items: center; height: 50vh;">
+        <div style="text-align: center;">
+            <i class="fas fa-spinner fa-spin fa-2x" style="color: var(--primary); margin-bottom: 1rem;"></i>
+            <p>Memuat panel admin...</p>
+        </div>
+    </div>
+
+    <!-- Admin Panel (hidden initially) -->
+    <div class="admin-panel" id="adminPanel" style="display: none;">
+        <div class="admin-header">
+            <h1><i class="fas fa-cog"></i> Panel Administrator</h1>
+            <div class="admin-actions">
+                <button class="btn btn-success" id="exportData">
+                    <i class="fas fa-download"></i>
+                    <span class="text">Ekspor Data</span>
+                </button>
+                <button class="btn btn-primary" id="refreshData">
+                    <i class="fas fa-sync-alt"></i>
+                    <span class="text">Refresh</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="admin-tabs">
+            <button class="admin-tab active" data-tab="issues">
+                <i class="fas fa-list"></i>
+                <span>Kelola Laporan</span>
+                <span class="badge" id="issuesCount">0</span>
+            </button>
+            <button class="admin-tab" data-tab="analytics">
+                <i class="fas fa-chart-line"></i>
+                <span>Analitik</span>
+            </button>
+            <button class="admin-tab" data-tab="settings">
+                <i class="fas fa-sliders-h"></i>
+                <span>Pengaturan</span>
+            </button>
+        </div>
+        
+        <div class="admin-content">
+            <!-- Issues Management Tab -->
+            <div id="issues-tab" class="admin-tab-content">
+                <div class="tab-header">
+                    <h2><i class="fas fa-list"></i> Kelola Laporan Isu Lingkungan</h2>
+                    <div class="tab-actions">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Cari laporan..." id="searchIssues">
+                        </div>
+                        <select id="statusFilter" class="form-control">
+                            <option value="">Semua Status</option>
+                            <option value="new">Baru</option>
+                            <option value="in-progress">Diproses</option>
+                            <option value="completed">Selesai</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="issues-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Jenis Isu</th>
+                                <th>Lokasi</th>
+                                <th>Status</th>
+                                <th>Tanggal</th>
+                                <th>Pelapor</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="issuesTableBody">
+                            <tr>
+                                <td colspan="7" class="loading">Memuat data laporan...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="table-footer">
+                    <div class="table-info" id="tableInfo">
+                        Menampilkan 0 laporan
+                    </div>
+                    <div class="pagination">
+                        <button class="btn btn-outline btn-sm" id="prevPage" disabled>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span class="page-info" style="padding: 0.5rem;">Halaman 1</span>
+                        <button class="btn btn-outline btn-sm" id="nextPage">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Analytics Tab -->
+            <div id="analytics-tab" class="admin-tab-content" style="display: none;">
+                <div class="tab-header">
+                    <h2><i class="fas fa-chart-line"></i> Analitik Laporan</h2>
+                    <div class="date-filter">
+                        <select class="form-control" id="analyticsPeriod">
+                            <option value="7">7 Hari Terakhir</option>
+                            <option value="30" selected>30 Hari Terakhir</option>
+                            <option value="90">3 Bulan Terakhir</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <div class="analytics-header">
+                            <h3>Ringkasan Laporan</h3>
+                        </div>
+                        <div class="analytics-stats">
+                            <div class="stat-item">
+                                <div class="stat-value" id="totalReports">0</div>
+                                <div class="stat-label">Total Laporan</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="avgResolution">0 hr</div>
+                                <div class="stat-label">Rata-rata Waktu</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="completionRate">0%</div>
+                                <div class="stat-label">Tingkat Penyelesaian</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="analytics-card">
+                        <div class="analytics-header">
+                            <h3>Distribusi Jenis Isu</h3>
+                        </div>
+                        <div class="chart-placeholder">
+                            <div class="chart-dummy">
+                                <div class="chart-bar" style="height: 80%; background: var(--primary);" data-label="Sampah" data-count="0"></div>
+                                <div class="chart-bar" style="height: 60%; background: var(--secondary);" data-label="Air" data-count="0"></div>
+                                <div class="chart-bar" style="height: 40%; background: var(--accent);" data-label="Fasilitas" data-count="0"></div>
+                                <div class="chart-bar" style="height: 20%; background: var(--success);" data-label="Lainnya" data-count="0"></div>
+                            </div>
+                            <div class="chart-labels"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="analytics-card full-width">
+                        <div class="analytics-header">
+                            <h3>Trend Laporan Bulanan</h3>
+                        </div>
+                        <div class="trend-placeholder">
+                            <div class="trend-stats">
+                                <div class="trend-item">
+                                    <div class="trend-value" id="monthlyReports">0</div>
+                                    <div class="trend-label">Laporan Bulan Ini</div>
+                                </div>
+                                <div class="trend-item">
+                                    <div class="trend-value" id="resolvedThisMonth">0</div>
+                                    <div class="trend-label">Diselesaikan</div>
+                                </div>
+                                <div class="trend-item">
+                                    <div class="trend-value" id="resolutionRate">0%</div>
+                                    <div class="trend-label">Tingkat Resolusi</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Settings Tab -->
+            <div id="settings-tab" class="admin-tab-content" style="display: none;">
+                <div class="tab-header">
+                    <h2><i class="fas fa-sliders-h"></i> Pengaturan Sistem</h2>
+                </div>
+                
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <h3><i class="fas fa-bell"></i> Notifikasi</h3>
+                        <div class="setting-item">
+                            <label>Email Notifikasi</label>
+                            <input type="email" class="form-control" value="admin@lingkungankita.id">
+                        </div>
+                        <div class="setting-item">
+                            <label class="toggle-label">
+                                <span>Notifikasi Laporan Baru</span>
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <h3><i class="fas fa-map-marker-alt"></i> Wilayah</h3>
+                        <div class="setting-item">
+                            <label>Wilayah Default</label>
+                            <select class="form-control">
+                                <option>Jakarta Pusat</option>
+                                <option>Jakarta Selatan</option>
+                                <option>Jakarta Timur</option>
+                                <option>Jakarta Barat</option>
+                                <option>Jakarta Utara</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <h3><i class="fas fa-shield-alt"></i> Keamanan</h3>
+                        <div class="setting-item">
+                            <button class="btn btn-outline" id="changePassword">
+                                <i class="fas fa-key"></i>
+                                Ganti Password
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+    
+    <script>
+        // Auth state management
+        firebase.auth().onAuthStateChanged((user) => {
+            const loadingScreen = document.getElementById('loadingScreen');
+            const adminPanel = document.getElementById('adminPanel');
+            
+            if (user) {
+                // User is signed in
+                console.log('Admin user:', user.email);
+                document.getElementById('adminUsername').textContent = user.email;
+                
+                // Show admin panel
+                loadingScreen.style.display = 'none';
+                adminPanel.style.display = 'block';
+                
+                // Load admin data
+                loadAdminIssues();
+                
+            } else {
+                // User is signed out, redirect to login
+                console.log('No user, redirecting to login');
+                window.location.href = 'admin-login.html';
+            }
+        });
+
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            if (confirm('Apakah Anda yakin ingin keluar?')) {
+                firebase.auth().signOut().then(() => {
+                    console.log('User signed out');
+                    window.location.href = 'admin-login.html';
+                }).catch((error) => {
+                    console.error('Sign out error:', error);
+                });
+            }
+        });
+
+        // Basic admin functions (sementara)
+        async function loadAdminIssues() {
+            try {
+                const tableBody = document.getElementById('issuesTableBody');
+                
+                // Coba ambil data dari Firestore
+                const querySnapshot = await db.collection('issues').get();
+                
+                if (querySnapshot.empty) {
+                    tableBody.innerHTML = '<tr><td colspan="7" class="no-data">Belum ada laporan</td></tr>';
+                    return;
+                }
+                
+                tableBody.innerHTML = '';
+                let count = 0;
+                
+                querySnapshot.forEach((doc) => {
+                    count++;
+                    const issue = doc.data();
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${doc.id}</td>
+                        <td>${issue.type || 'Tidak diketahui'}</td>
+                        <td>${issue.location || 'Tidak ada lokasi'}</td>
+                        <td><span class="issue-status status-${issue.status || 'new'}">${issue.status || 'Baru'}</span></td>
+                        <td>${issue.createdAt ? new Date(issue.createdAt.seconds * 1000).toLocaleDateString('id-ID') : 'Tidak diketahui'}</td>
+                        <td>${issue.reporterEmail || 'Tidak ada email'}</td>
+                        <td class="action-buttons">
+                            <button class="btn btn-primary btn-sm" onclick="viewIssue('${doc.id}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-success btn-sm" onclick="updateIssueStatus('${doc.id}')">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteIssue('${doc.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+                
+                document.getElementById('issuesCount').textContent = count;
+                document.getElementById('tableInfo').textContent = `Menampilkan ${count} laporan`;
+                
+            } catch (error) {
+                console.error('Error loading issues:', error);
+                const tableBody = document.getElementById('issuesTableBody');
+                tableBody.innerHTML = '<tr><td colspan="7" class="error">Gagal memuat data. Periksa koneksi internet dan konfigurasi Firebase.</td></tr>';
+            }
+        }
+
+        // Basic admin functions
+        function viewIssue(issueId) {
+            alert(`Melihat detail laporan: ${issueId}`);
+        }
+
+        function updateIssueStatus(issueId) {
+            alert(`Mengupdate status laporan: ${issueId}`);
+        }
+
+        function deleteIssue(issueId) {
+            if (confirm(`Hapus laporan ${issueId}?`)) {
+                alert(`Menghapus laporan: ${issueId}`);
+            }
+        }
+
+        // Tab functionality
+        document.querySelectorAll('.admin-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.admin-tab-content').forEach(c => c.style.display = 'none');
+                
+                tab.classList.add('active');
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(`${tabId}-tab`).style.display = 'block';
+            });
+        });
+
+        // Refresh data
+        document.getElementById('refreshData').addEventListener('click', () => {
+            loadAdminIssues();
+        });
+    </script>
+</body>
+</html>

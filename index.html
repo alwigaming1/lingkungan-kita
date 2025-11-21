@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lingkungan Kita - Platform Pelaporan Lingkungan</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <span class="logo-icon">🌱</span>
+            <span>LingkunganKita</span>
+        </div>
+        <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="nav-buttons">
+            <button class="btn btn-primary" id="reportIssueBtn">
+                <i class="fas fa-plus"></i>
+                <span class="text">Laporkan Isu</span>
+            </button>
+            <a href="admin-login.html" class="btn btn-secondary">
+                <i class="fas fa-cog"></i>
+                <span class="text">Admin</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- User Portal -->
+    <div class="container" id="userPortal">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <h2><i class="fas fa-chart-bar"></i> Statistik Isu</h2>
+            <div class="stats-container">
+                <div class="stat-card">
+                    <h3>Total Laporan</h3>
+                    <div class="stat-value">247</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Laporan Selesai Minggu Ini</h3>
+                    <div class="stat-value">18</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Isu Paling Mendesak</h3>
+                    <div class="stat-value">Sampah Liar</div>
+                </div>
+            </div>
+            
+            <div class="filter-section">
+                <h3><i class="fas fa-filter"></i> Filter Status</h3>
+                <div class="filter-options">
+                    <div class="filter-option">
+                        <input type="checkbox" id="filter-new" checked>
+                        <label for="filter-new">Baru</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="filter-in-progress" checked>
+                        <label for="filter-in-progress">Diproses</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="filter-completed">
+                        <label for="filter-completed">Selesai</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="filter-section">
+                <h3><i class="fas fa-tags"></i> Jenis Isu</h3>
+                <div class="filter-options">
+                    <div class="filter-option">
+                        <input type="checkbox" id="type-trash" checked>
+                        <label for="type-trash">Sampah Liar</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="type-water" checked>
+                        <label for="type-water">Polusi Air</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="type-facility" checked>
+                        <label for="type-facility">Kerusakan Fasilitas</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="type-tree" checked>
+                        <label for="type-tree">Pohon Tumbang</label>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="welcome-banner">
+                <h1>Selamat Datang di LingkunganKita</h1>
+                <p>Platform kolaboratif untuk melaporkan dan memantau isu lingkungan di sekitar Anda. Laporkan isu lingkungan dengan mudah dan pantau perkembangannya.</p>
+            </div>
+            
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+            
+            <section class="recent-issues">
+                <div class="section-header">
+                    <h2><i class="fas fa-list"></i> Laporan Terbaru</h2>
+                    <button class="btn btn-outline btn-sm" id="refreshIssues">
+                        <i class="fas fa-sync-alt"></i>
+                        <span class="text">Muat Ulang</span>
+                    </button>
+                </div>
+                <div class="issues-list" id="issuesList">
+                    <!-- Issue cards will be loaded here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal for Reporting Issue -->
+    <div class="modal" id="reportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-plus-circle"></i> Laporkan Isu Baru</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="step-indicator">
+                    <div class="step active"></div>
+                    <div class="step"></div>
+                    <div class="step"></div>
+                    <div class="step"></div>
+                    <div class="step"></div>
+                </div>
+                <form id="issueForm">
+                    <!-- Step 1: Issue Type -->
+                    <div class="form-step active" id="step1">
+                        <div class="form-group">
+                            <label>Pilih Jenis Isu</label>
+                            <div class="issue-types">
+                                <div class="issue-type-btn" data-type="trash">
+                                    <i class="fas fa-trash issue-type-icon"></i>
+                                    <span>Sampah Liar</span>
+                                </div>
+                                <div class="issue-type-btn" data-type="water">
+                                    <i class="fas fa-tint issue-type-icon"></i>
+                                    <span>Polusi Air</span>
+                                </div>
+                                <div class="issue-type-btn" data-type="facility">
+                                    <i class="fas fa-tools issue-type-icon"></i>
+                                    <span>Kerusakan Fasilitas</span>
+                                </div>
+                                <div class="issue-type-btn" data-type="tree">
+                                    <i class="fas fa-tree issue-type-icon"></i>
+                                    <span>Pohon Tumbang</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-navigation">
+                            <button type="button" class="btn btn-outline" id="cancelReport">Batal</button>
+                            <button type="button" class="btn btn-primary" id="nextToStep2">Lanjut</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2: Location -->
+                    <div class="form-step" id="step2">
+                        <div class="form-group">
+                            <label>Tandai Lokasi</label>
+                            <div id="locationMap" style="height: 200px; margin-bottom: 10px; border-radius: 8px; overflow: hidden;"></div>
+                            <button type="button" class="btn btn-outline" id="useCurrentLocation">
+                                <i class="fas fa-location-arrow"></i>
+                                Gunakan Lokasi Saat Ini
+                            </button>
+                        </div>
+                        <div class="form-navigation">
+                            <button type="button" class="btn btn-outline" id="backToStep1">Kembali</button>
+                            <button type="button" class="btn btn-primary" id="nextToStep3">Lanjut</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3: Photos -->
+                    <div class="form-step" id="step3">
+                        <div class="form-group">
+                            <label>Unggah Bukti Foto (Maksimal 3)</label>
+                            <input type="file" id="photoUpload" accept="image/*" multiple>
+                            <div class="photo-preview" id="photoPreview"></div>
+                        </div>
+                        <div class="form-navigation">
+                            <button type="button" class="btn btn-outline" id="backToStep2">Kembali</button>
+                            <button type="button" class="btn btn-primary" id="nextToStep4">Lanjut</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 4: Description -->
+                    <div class="form-step" id="step4">
+                        <div class="form-group">
+                            <label>Deskripsi Singkat</label>
+                            <textarea class="form-control" id="issueDescription" rows="3" maxlength="300" placeholder="Jelaskan isu yang Anda temukan..."></textarea>
+                            <small id="charCount">0/300 karakter</small>
+                        </div>
+                        <div class="form-navigation">
+                            <button type="button" class="btn btn-outline" id="backToStep3">Kembali</button>
+                            <button type="button" class="btn btn-primary" id="nextToStep5">Lanjut</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 5: Contact Info -->
+                    <div class="form-step" id="step5">
+                        <div class="form-group">
+                            <label>Informasi Kontak (Opsional)</label>
+                            <p class="form-help-text">Informasi kontak digunakan untuk memberikan update tentang laporan Anda.</p>
+                            <input type="email" class="form-control" id="userEmail" placeholder="Email">
+                            <input type="tel" class="form-control" id="userPhone" placeholder="Nomor Telepon" style="margin-top: 10px;">
+                        </div>
+                        <div class="form-navigation">
+                            <button type="button" class="btn btn-outline" id="backToStep4">Kembali</button>
+                            <button type="submit" class="btn btn-primary" id="submitIssue">Kirim Laporan</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="user-app.js"></script>
+    <!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<!-- HAPUS storage -->
+<!-- <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script> -->
+
+<script src="firebase-config.js"></script>
+<script src="user-app.js"></script>
+</body>
+</html>
