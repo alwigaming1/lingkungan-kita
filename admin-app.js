@@ -1,337 +1,265 @@
-// admin-app.js - Versi dengan Firebase
+// admin-app.js - FIXED VERSION
+console.log("=== ADMIN PANEL - FIXED VERSION ===");
 
-// Check authentication
+// Initialize Firebase (pastikan ini sudah ada di file lain atau tambahkan di sini)
+// Pastikan db sudah didefinisikan sebelumnya
+
+// Check if user is logged in
 firebase.auth().onAuthStateChanged((user) => {
+    console.log("Auth state changed:", user);
     if (!user) {
+        console.log("No user, redirecting to login");
         window.location.href = 'admin-login.html';
     } else {
-        document.getElementById('adminUsername').textContent = user.email.split('@')[0];
-        loadAdminIssues();
+        console.log("User is logged in:", user.email);
+        showAdminPanel();
+        loadIssues();
     }
 });
 
-// Load issues from Firebase
-async function loadAdminIssues() {
+function showAdminPanel() {
+    console.log("Showing admin panel");
+    const loadingScreen = document.getElementById('loadingScreen');
+    const adminPanel = document.getElementById('adminPanel');
+    
+    if (loadingScreen) loadingScreen.style.display = 'none';
+    if (adminPanel) adminPanel.style.display = 'block';
+    
+    const adminUsername = document.getElementById('adminUsername');
+    if (adminUsername) {
+        adminUsername.textContent = firebase.auth().currentUser.email;
+    }
+}
+
+// Load issues function
+async function loadIssues() {
+    console.log("Loading issues...");
+    
     try {
         const tableBody = document.getElementById('issuesTableBody');
-        tableBody.innerHTML = '<tr><td colspan="7" class="loading">Memuat laporan...</td></tr>';
-        
-        const querySnapshot = await db.collection('issues')
-            .orderBy('createdAt', 'desc')
-            .get();
-        
-        tableBody.innerHTML = '';
-        
-        let totalReports = 0;
-        let newReports = 0;
-        let inProgressReports = 0;
-        let completedReports = 0;
-        
-        querySnapshot.forEach((doc) => {
-            const issue = { id: doc.id, ...doc.data() };
-            displayIssueInTable(issue);
-            
-            totalReports++;
-            if (issue.status === 'new') newReports++;
-            if (issue.status === 'in-progress') inProgressReports++;
-            if (issue.status === 'completed') completedReports++;
-        });
-        
-        // Update counts
-        document.getElementById('issuesCount').textContent = totalReports;
-        document.getElementById('tableInfo').textContent = `Menampilkan ${totalReports} laporan`;
-        
-        // Update analytics
-        updateAnalytics(totalReports, newReports, inProgressReports, completedReports);
-        
-        if (querySnapshot.empty) {
-            tableBody.innerHTML = '<tr><td colspan="7" class="no-data">Belum ada laporan</td></tr>';
-        }
-        
-    } catch (error) {
-        console.error('Error loading issues:', error);
-        tableBody.innerHTML = '<tr><td colspan="7" class="error">Gagal memuat laporan</td></tr>';
-    }
-}
-
-// Display issue in admin table
-function displayIssueInTable(issue) {
-    const tableBody = document.getElementById('issuesTableBody');
-    const row = document.createElement('tr');
-    row.innerHTML = `
-        <td>${issue.id}</td>
-        <td>${getIssueTypeLabel(issue.type)}</td>
-        <td>${issue.location || 'Lokasi tidak tersedia'}</td>
-        <td><span class="issue-status status-${issue.status}">${getStatusLabel(issue.status)}</span></td>
-        <td>${formatDate(issue.createdAt)}</td>
-        <td>${issue.reporterEmail || 'Tidak ada kontak'}</td>
-        <td class="action-buttons">
-            <button class="btn btn-primary btn-sm view-issue" data-id="${issue.id}">
-                <i class="fas fa-eye"></i>
-            </button>
-            <button class="btn btn-success btn-sm update-issue" data-id="${issue.id}">
-                <i class="fas ${issue.status === 'completed' ? 'fa-redo' : 'fa-check'}"></i>
-            </button>
-            <button class="btn btn-danger btn-sm delete-issue" data-id="${issue.id}">
-                <i class="fas fa-trash"></i>
-            </button>
-        </td>
-    `;
-    tableBody.appendChild(row);
-    
-    // Add event listeners
-    row.querySelector('.view-issue').addEventListener('click', () => {
-        viewIssueDetails(issue.id);
-    });
-    
-    row.querySelector('.update-issue').addEventListener('click', () => {
-        updateIssueStatus(issue.id, issue.status);
-    });
-    
-    row.querySelector('.delete-issue').addEventListener('click', () => {
-        deleteIssue(issue.id);
-    });
-}
-
-// Update issue status in Firebase
-async function updateIssueStatus(issueId, currentStatus) {
-    try {
-        // Cycle through statuses
-        const statusOrder = ['new', 'in-progress', 'completed'];
-        const currentIndex = statusOrder.indexOf(currentStatus);
-        const nextIndex = (currentIndex + 1) % statusOrder.length;
-        const newStatus = statusOrder[nextIndex];
-        
-        await db.collection('issues').doc(issueId).update({
-            status: newStatus,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        alert(`Status laporan ${issueId} diubah menjadi: ${getStatusLabel(newStatus)}`);
-        loadAdminIssues();
-        
-    } catch (error) {
-        console.error('Error updating issue:', error);
-        alert('Gagal mengupdate status laporan');
-    }
-}
-
-// Delete issue from Firebase
-async function deleteIssue(issueId) {
-    if (confirm(`Apakah Anda yakin ingin menghapus laporan ${issueId}? Tindakan ini tidak dapat dibatalkan.`)) {
-        try {
-            await db.collection('issues').doc(issueId).delete();
-            alert(`Laporan ${issueId} telah dihapus.`);
-            loadAdminIssues();
-        } catch (error) {
-            console.error('Error deleting issue:', error);
-            alert('Gagal menghapus laporan');
-        }
-    }
-}
-
-// View issue details
-async function viewIssueDetails(issueId) {
-    try {
-        const doc = await db.collection('issues').doc(issueId).get();
-        
-        if (!doc.exists) {
-            alert('Laporan tidak ditemukan');
+        if (!tableBody) {
+            console.error("Table body element not found!");
             return;
         }
         
-        const issue = { id: doc.id, ...doc.data() };
+        tableBody.innerHTML = '<tr><td colspan="7">Loading data...</td></tr>';
         
-        const modal = document.getElementById('adminModal');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalBody = document.getElementById('modalBody');
+        // Pastikan db sudah terdefinisi
+        if (typeof db === 'undefined') {
+            console.error("Firestore db is not defined!");
+            tableBody.innerHTML = '<tr><td colspan="7">Database connection error</td></tr>';
+            return;
+        }
         
-        modalTitle.textContent = `Detail Laporan - ${issue.id}`;
-        modalBody.innerHTML = `
-            <div class="issue-detail">
-                <div class="detail-section">
-                    <h3>Informasi Laporan</h3>
-                    <div class="detail-grid">
-                        <div class="detail-item">
-                            <label>ID Laporan:</label>
-                            <span>${issue.id}</span>
-                        </div>
-                        <div class="detail-item">
-                            <label>Judul:</label>
-                            <span>${issue.title}</span>
-                        </div>
-                        <div class="detail-item">
-                            <label>Jenis Isu:</label>
-                            <span>${getIssueTypeLabel(issue.type)}</span>
-                        </div>
-                        <div class="detail-item">
-                            <label>Status:</label>
-                            <span class="issue-status status-${issue.status}">${getStatusLabel(issue.status)}</span>
-                        </div>
-                        <div class="detail-item">
-                            <label>Lokasi:</label>
-                            <span>${issue.location || 'Tidak tersedia'}</span>
-                        </div>
-                        <div class="detail-item">
-                            <label>Email Pelapor:</label>
-                            <span>${issue.reporterEmail || 'Tidak tersedia'}</span>
-                        </div>
-                        <div class="detail-item">
-                            <label>Telepon Pelapor:</label>
-                            <span>${issue.reporterPhone || 'Tidak tersedia'}</span>
-                        </div>
-                        <div class="detail-item">
-                            <label>Koordinat:</label>
-                            <span>${issue.coordinates ? `${issue.coordinates.latitude}, ${issue.coordinates.longitude}` : 'Tidak tersedia'}</span>
-                        </div>
-                        <div class="detail-item">
-                            <label>Tanggal Lapor:</label>
-                            <span>${formatDate(issue.createdAt)}</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="detail-section">
-                    <h3>Deskripsi Isu</h3>
-                    <div class="description-box">
-                        <p>${issue.description}</p>
-                    </div>
-                </div>
-                
-                ${issue.photoUrls && issue.photoUrls.length > 0 ? `
-                <div class="detail-section">
-                    <h3>Foto Bukti</h3>
-                    <div class="photo-gallery">
-                        ${issue.photoUrls.map(url => `
-                            <div class="photo-item">
-                                <img src="${url}" alt="Bukti foto" onclick="openPhoto('${url}')">
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-                ` : ''}
-                
-                <div class="detail-section">
-                    <h3>Update Status</h3>
-                    <div class="status-actions">
-                        <select class="form-control" id="statusUpdate">
-                            <option value="new" ${issue.status === 'new' ? 'selected' : ''}>Baru</option>
-                            <option value="in-progress" ${issue.status === 'in-progress' ? 'selected' : ''}>Diproses</option>
-                            <option value="completed" ${issue.status === 'completed' ? 'selected' : ''}>Selesai</option>
-                        </select>
-                        <button class="btn btn-primary" onclick="saveStatusUpdate('${issue.id}')">
-                            <i class="fas fa-save"></i> Simpan Status
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
+        const snapshot = await db.collection('issues').orderBy('createdAt', 'desc').get();
+        console.log("Got snapshot:", snapshot.size, "documents");
         
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
+        tableBody.innerHTML = '';
         
-    } catch (error) {
-        console.error('Error loading issue details:', error);
-        alert('Gagal memuat detail laporan');
-    }
-}
-
-// Save status update from modal
-async function saveStatusUpdate(issueId) {
-    try {
-        const statusSelect = document.getElementById('statusUpdate');
-        const newStatus = statusSelect.value;
+        if (snapshot.empty) {
+            tableBody.innerHTML = '<tr><td colspan="7">No issues found</td></tr>';
+            return;
+        }
         
-        await db.collection('issues').doc(issueId).update({
-            status: newStatus,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            console.log("Issue data:", data);
+            
+            const row = document.createElement('tr');
+            
+            // Add status-based class for styling
+            const statusClass = getStatusClass(data.status || 'new');
+            row.className = statusClass;
+            
+            row.innerHTML = `
+                <td>${doc.id.substring(0, 8)}...</td>
+                <td>${data.type || 'Unknown'}</td>
+                <td>${data.location || 'No location'}</td>
+                <td><span class="status-badge status-${data.status || 'new'}">${data.status || 'new'}</span></td>
+                <td>${data.createdAt ? data.createdAt.toDate().toLocaleDateString() : 'Unknown'}</td>
+                <td>${data.reporterEmail || 'No email'}</td>
+                <td>
+                    <button class="btn btn-sm btn-primary" onclick="viewIssue('${doc.id}')">View</button>
+                    <button class="btn btn-sm btn-success" onclick="updateStatus('${doc.id}')">Edit</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteIssue('${doc.id}')">Delete</button>
+                </td>
+            `;
+            tableBody.appendChild(row);
         });
         
-        alert(`Status laporan ${issueId} telah diubah menjadi: ${getStatusLabel(newStatus)}`);
-        closeAdminModal();
-        loadAdminIssues();
-        
     } catch (error) {
-        console.error('Error updating status:', error);
-        alert('Gagal mengupdate status');
+        console.error("Error loading issues:", error);
+        const tableBody = document.getElementById('issuesTableBody');
+        if (tableBody) {
+            tableBody.innerHTML = '<tr><td colspan="7">Error loading data: ' + error.message + '</td></tr>';
+        }
     }
 }
 
-// Update analytics data
-function updateAnalytics(total, newCount, inProgress, completed) {
-    document.getElementById('totalReports').textContent = total;
-    document.getElementById('avgResolution').textContent = '2.5 hr';
-    document.getElementById('completionRate').textContent = total > 0 ? Math.round((completed / total) * 100) + '%' : '0%';
+// Helper function for status styling
+function getStatusClass(status) {
+    switch(status) {
+        case 'completed': return 'status-completed';
+        case 'in-progress': return 'status-in-progress';
+        case 'new': return 'status-new';
+        default: return 'status-unknown';
+    }
+}
+
+// View issue function - improved with modal
+async function viewIssue(issueId) {
+    console.log("Viewing issue:", issueId);
+    try {
+        const doc = await db.collection('issues').doc(issueId).get();
+        if (doc.exists) {
+            const data = doc.data();
+            
+            // Create a more detailed view
+            const details = `
+ISSUE DETAILS:
+
+ID: ${issueId}
+Type: ${data.type || 'Unknown'}
+Status: ${data.status || 'new'}
+Location: ${data.location || 'No location'}
+Description: ${data.description || 'No description'}
+Email: ${data.reporterEmail || 'No email'}
+Phone: ${data.reporterPhone || 'No phone'}
+Created: ${data.createdAt ? data.createdAt.toDate().toLocaleString() : 'Unknown'}
+Updated: ${data.updatedAt ? data.updatedAt.toDate().toLocaleString() : 'Never'}
+            `;
+            
+            alert(details);
+        } else {
+            alert("Issue not found");
+        }
+    } catch (error) {
+        console.error("Error viewing issue:", error);
+        alert("Error loading issue details: " + error.message);
+    }
+}
+
+// Update status function - improved with dropdown
+async function updateStatus(issueId) {
+    const newStatus = prompt(
+        "Enter new status:\n\n- new\n- in-progress\n- completed", 
+        "new"
+    );
     
-    document.getElementById('monthlyReports').textContent = total;
-    document.getElementById('resolvedThisMonth').textContent = completed;
-    document.getElementById('resolutionRate').textContent = total > 0 ? Math.round((completed / total) * 100) + '%' : '0%';
+    if (newStatus && ['new', 'in-progress', 'completed'].includes(newStatus)) {
+        try {
+            await db.collection('issues').doc(issueId).update({
+                status: newStatus,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            alert("Status updated successfully!");
+            loadIssues(); // Reload the list
+        } catch (error) {
+            console.error("Error updating status:", error);
+            alert("Error updating status: " + error.message);
+        }
+    } else if (newStatus) {
+        alert("Invalid status! Please use: new, in-progress, or completed");
+    }
 }
 
-// Export data to CSV
-document.getElementById('exportData').addEventListener('click', async function() {
-    try {
-        const btn = this;
-        const originalHTML = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengekspor...';
-        btn.disabled = true;
-        
-        const querySnapshot = await db.collection('issues').get();
-        const issues = [];
-        
-        querySnapshot.forEach((doc) => {
-            issues.push({ id: doc.id, ...doc.data() });
-        });
-        
-        // Convert to CSV
-        const csv = convertToCSV(issues);
-        
-        // Download CSV
-        downloadCSV(csv, 'laporan-lingkungan.csv');
-        
-        btn.innerHTML = originalHTML;
-        btn.disabled = false;
-        alert('Data berhasil diekspor!');
-        
-    } catch (error) {
-        console.error('Error exporting data:', error);
-        alert('Gagal mengekspor data');
+// Delete issue function - with better confirmation
+async function deleteIssue(issueId) {
+    if (confirm(`Are you sure you want to delete issue ${issueId}?\n\nThis action cannot be undone!`)) {
+        try {
+            await db.collection('issues').doc(issueId).delete();
+            alert("Issue deleted successfully!");
+            loadIssues(); // Reload the list
+        } catch (error) {
+            console.error("Error deleting issue:", error);
+            alert("Error deleting issue: " + error.message);
+        }
     }
+}
+
+// Initialize event listeners when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM loaded, initializing event listeners");
+    
+    // Logout function
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function() {
+            if (confirm("Are you sure you want to logout?")) {
+                firebase.auth().signOut().then(() => {
+                    console.log("User signed out");
+                    window.location.href = 'admin-login.html';
+                });
+            }
+        });
+    }
+    
+    // Refresh function
+    const refreshData = document.getElementById('refreshData');
+    if (refreshData) {
+        refreshData.addEventListener('click', function() {
+            console.log("Refreshing data...");
+            loadIssues();
+        });
+    }
+    
+    // Export function - basic implementation
+    const exportData = document.getElementById('exportData');
+    if (exportData) {
+        exportData.addEventListener('click', async function() {
+            try {
+                const snapshot = await db.collection('issues').get();
+                let csvContent = "ID,Type,Location,Status,Email,Created\\n";
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    csvContent += `"${doc.id}","${data.type || ''}","${data.location || ''}","${data.status || ''}","${data.reporterEmail || ''}","${data.createdAt ? data.createdAt.toDate().toISOString() : ''}"\\n`;
+                });
+                
+                // Create download link
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `issues-export-${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                alert("Data exported successfully!");
+            } catch (error) {
+                console.error("Error exporting data:", error);
+                alert("Error exporting data: " + error.message);
+            }
+        });
+    }
+    
+    // Tab switching
+    document.querySelectorAll('.admin-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Remove active class from all tabs
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+            // Add active class to clicked tab
+            this.classList.add('active');
+            
+            // Show corresponding content
+            const tabId = this.getAttribute('data-tab');
+            document.querySelectorAll('.admin-tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            const targetTab = document.getElementById(tabId + '-tab');
+            if (targetTab) {
+                targetTab.style.display = 'block';
+            }
+        });
+    });
 });
 
-// Helper function to convert to CSV
-function convertToCSV(issues) {
-    const headers = ['ID', 'Jenis', 'Status', 'Lokasi', 'Email Pelapor', 'Tanggal'];
-    const rows = issues.map(issue => [
-        issue.id,
-        getIssueTypeLabel(issue.type),
-        getStatusLabel(issue.status),
-        issue.location,
-        issue.reporterEmail || '',
-        formatDate(issue.createdAt)
-    ]);
-    
-    return [headers, ...rows].map(row => row.map(field => `"${field}"`).join(',')).join('\n');
-}
+// Make functions global
+window.viewIssue = viewIssue;
+window.updateStatus = updateStatus;
+window.deleteIssue = deleteIssue;
 
-// Helper function to download CSV
-function downloadCSV(csv, filename) {
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    window.URL.revokeObjectURL(url);
-}
-
-// Logout
-document.getElementById('logoutBtn').addEventListener('click', function() {
-    if (confirm('Apakah Anda yakin ingin keluar?')) {
-        firebase.auth().signOut().then(() => {
-            window.location.href = 'admin-login.html';
-        });
-    }
-});
-
-// ... (rest of existing helper functions)
+console.log("Admin panel initialized");

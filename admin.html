@@ -199,55 +199,124 @@
                 </div>
             </div>
             
-            <!-- Settings Tab -->
-            <div id="settings-tab" class="admin-tab-content" style="display: none;">
-                <div class="tab-header">
-                    <h2><i class="fas fa-sliders-h"></i> Pengaturan Sistem</h2>
-                </div>
-                
-                <div class="settings-grid">
-                    <div class="settings-card">
-                        <h3><i class="fas fa-bell"></i> Notifikasi</h3>
-                        <div class="setting-item">
-                            <label>Email Notifikasi</label>
-                            <input type="email" class="form-control" value="admin@lingkungankita.id">
-                        </div>
-                        <div class="setting-item">
-                            <label class="toggle-label">
-                                <span>Notifikasi Laporan Baru</span>
-                                <input type="checkbox" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
+           <!-- Settings Tab -->
+<div id="settings-tab" class="admin-tab-content" style="display: none;">
+    <div class="tab-header">
+        <h2><i class="fas fa-sliders-h"></i> Pengaturan Sistem</h2>
+    </div>
+    
+    <div class="settings-grid">
+        <div class="settings-card">
+            <h3><i class="fas fa-bell"></i> Notifikasi</h3>
+            <div class="setting-item">
+                <label>Email Notifikasi</label>
+                <input type="email" class="form-control" value="admin@lingkungankita.id">
+            </div>
+            <div class="setting-item">
+                <label class="toggle-label">
+                    <span>Notifikasi Laporan Baru</span>
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <label class="toggle-label">
+                    <span>Notifikasi Email Otomatis</span>
+                    <input type="checkbox">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+        
+        <div class="settings-card">
+            <h3><i class="fas fa-map-marker-alt"></i> Wilayah Kecamatan</h3>
+            <div class="setting-item">
+                <label>Kecamatan Default</label>
+                <select class="form-control" id="defaultKecamatan">
+                    <option value="">Pilih Kecamatan</option>
+                    <option value="Ujung Bulu">Ujung Bulu</option>
+                    <option value="Ujung Loe">Ujung Loe</option>
+                    <option value="Gantorang">Gantorang</option>
+                    <option value="Kindang">Kindang</option>
+                    <option value="Bonto Bahari">Bonto Bahari</option>
+                    <option value="Bontotiro">Bontotiro</option>
+                    <option value="Hero Lange-Lange">Hero Lange-Lange</option>
+                    <option value="Kajang">Kajang</option>
+                    <option value="Bulukumpa">Bulukumpa</option>
+                    <option value="Rilau Ale">Rilau Ale</option>
+                </select>
+            </div>
+            <div class="setting-item">
+                <label>Filter Berdasarkan Kecamatan</label>
+                <select class="form-control" id="filterKecamatan" multiple style="height: 120px;">
+                    <option value="Ujung Bulu" selected>Ujung Bulu</option>
+                    <option value="Ujung Loe" selected>Ujung Loe</option>
+                    <option value="Gantorang" selected>Gantorang</option>
+                    <option value="Kindang" selected>Kindang</option>
+                    <option value="Bonto Bahari" selected>Bonto Bahari</option>
+                    <option value="Bontotiro" selected>Bontotiro</option>
+                    <option value="Hero Lange-Lange" selected>Hero Lange-Lange</option>
+                    <option value="Kajang" selected>Kajang</option>
+                    <option value="Bulukumpa" selected>Bulukumpa</option>
+                    <option value="Rilau Ale" selected>Rilau Ale</option>
+                </select>
+                <small style="color: var(--gray); font-size: 0.8rem;">Tahan Ctrl untuk memilih multiple kecamatan</small>
+            </div>
+        </div>
+        
+        <div class="settings-card">
+            <h3><i class="fas fa-shield-alt"></i> Keamanan</h3>
+            <div class="setting-item">
+                <button class="btn btn-outline" id="changePassword">
+                    <i class="fas fa-key"></i>
+                    Ganti Password
+                </button>
+            </div>
+            <div class="setting-item">
+                <label class="toggle-label">
+                    <span>Two-Factor Authentication</span>
+                    <input type="checkbox">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <label>Session Timeout</label>
+                <select class="form-control">
+                    <option value="30">30 menit</option>
+                    <option value="60" selected>1 jam</option>
+                    <option value="120">2 jam</option>
+                    <option value="240">4 jam</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <h3><i class="fas fa-chart-bar"></i> Statistik Wilayah</h3>
+            <div class="setting-item">
+                <div id="kecamatanStats">
+                    <div class="stat-item-small">
+                        <span class="stat-label-small">Total Kecamatan:</span>
+                        <span class="stat-value-small">10</span>
                     </div>
-                    
-                    <div class="settings-card">
-                        <h3><i class="fas fa-map-marker-alt"></i> Wilayah</h3>
-                        <div class="setting-item">
-                            <label>Wilayah Default</label>
-                            <select class="form-control">
-                                <option>Jakarta Pusat</option>
-                                <option>Jakarta Selatan</option>
-                                <option>Jakarta Timur</option>
-                                <option>Jakarta Barat</option>
-                                <option>Jakarta Utara</option>
-                            </select>
-                        </div>
+                    <div class="stat-item-small">
+                        <span class="stat-label-small">Kecamatan Aktif:</span>
+                        <span class="stat-value-small">10</span>
                     </div>
-                    
-                    <div class="settings-card">
-                        <h3><i class="fas fa-shield-alt"></i> Keamanan</h3>
-                        <div class="setting-item">
-                            <button class="btn btn-outline" id="changePassword">
-                                <i class="fas fa-key"></i>
-                                Ganti Password
-                            </button>
-                        </div>
+                    <div class="stat-item-small">
+                        <span class="stat-label-small">Laporan Hari Ini:</span>
+                        <span class="stat-value-small">0</span>
                     </div>
                 </div>
             </div>
+            <div class="setting-item">
+                <button class="btn btn-outline btn-sm" onclick="updateKecamatanStats()">
+                    <i class="fas fa-sync-alt"></i>
+                    Update Statistik
+                </button>
+            </div>
         </div>
     </div>
+</div>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -366,17 +435,541 @@
             tab.addEventListener('click', () => {
                 document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
                 document.querySelectorAll('.admin-tab-content').forEach(c => c.style.display = 'none');
-                
+
                 tab.classList.add('active');
                 const tabId = tab.getAttribute('data-tab');
                 document.getElementById(`${tabId}-tab`).style.display = 'block';
             });
         });
 
-        // Refresh data
-        document.getElementById('refreshData').addEventListener('click', () => {
-            loadAdminIssues();
+        // Enhanced Refresh Function
+document.getElementById('refreshData').addEventListener('click', async function() {
+    const refreshBtn = this;
+    const originalHTML = refreshBtn.innerHTML;
+    
+    // Show loading state
+    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memuat...';
+    refreshBtn.disabled = true;
+    
+    try {
+        console.log('🔄 Refreshing data...');
+        
+        // Reload issues
+        await loadAdminIssues();
+        
+        // Reload analytics if on analytics tab
+        const activeTab = document.querySelector('.admin-tab.active');
+        if (activeTab && activeTab.getAttribute('data-tab') === 'analytics') {
+            await loadAnalytics();
+        }
+        
+        // Show success message
+        showAdminMessage('Data berhasil diperbarui!', 'success');
+        
+    } catch (error) {
+        console.error('Refresh error:', error);
+        showAdminMessage('Gagal memuat data: ' + error.message, 'error');
+    } finally {
+        // Restore button state
+        refreshBtn.innerHTML = originalHTML;
+        refreshBtn.disabled = false;
+    }
+});
+
+// Responsive Helper Functions
+function checkScreenSize() {
+    const width = window.innerWidth;
+    const adminPanel = document.getElementById('adminPanel');
+    
+    if (width < 768) {
+        document.body.classList.add('mobile-view');
+        document.body.classList.remove('tablet-view', 'desktop-view');
+    } else if (width < 1024) {
+        document.body.classList.add('tablet-view');
+        document.body.classList.remove('mobile-view', 'desktop-view');
+    } else {
+        document.body.classList.add('desktop-view');
+        document.body.classList.remove('mobile-view', 'tablet-view');
+    }
+}
+
+// Initialize responsive behavior
+document.addEventListener('DOMContentLoaded', function() {
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    
+    // Add touch support for mobile
+    if ('ontouchstart' in window) {
+        document.body.classList.add('touch-device');
+    }
+});
+
+// Enhanced table scrolling for mobile
+function initTableScroll() {
+    const tableContainer = document.querySelector('.table-container');
+    if (tableContainer && 'ontouchstart' in window) {
+        let startX;
+        let scrollLeft;
+        
+        tableContainer.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].pageX - tableContainer.offsetLeft;
+            scrollLeft = tableContainer.scrollLeft;
         });
+        
+        tableContainer.addEventListener('touchmove', (e) => {
+            if (!startX) return;
+            const x = e.touches[0].pageX - tableContainer.offsetLeft;
+            const walk = (x - startX) * 2;
+            tableContainer.scrollLeft = scrollLeft - walk;
+        });
+    }
+}
+
+// Call this after loading table data
+initTableScroll();
+
+// Enhanced Tab Switching
+document.querySelectorAll('.admin-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+        // Remove active class from all tabs
+        document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+        // Add active class to clicked tab
+        this.classList.add('active');
+        
+        // Show corresponding content
+        const tabId = this.getAttribute('data-tab');
+        document.querySelectorAll('.admin-tab-content').forEach(content => {
+            content.style.display = 'none';
+        });
+        
+        const targetTab = document.getElementById(tabId + '-tab');
+        if (targetTab) {
+            targetTab.style.display = 'block';
+            
+            // Load specific data based on tab
+            if (tabId === 'analytics') {
+                loadAnalytics();
+            } else if (tabId === 'issues') {
+                loadAdminIssues();
+            }
+        }
+    });
+});
+
+// Enhanced Export Function
+document.getElementById('exportData').addEventListener('click', async function() {
+    const exportBtn = this;
+    const originalHTML = exportBtn.innerHTML;
+    
+    // Show loading state
+    exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyiapkan...';
+    exportBtn.disabled = true;
+    
+    try {
+        console.log('📊 Preparing data export...');
+        
+        // Get all issues
+        const querySnapshot = await db.collection('issues')
+            .orderBy('createdAt', 'desc')
+            .get();
+        
+        if (querySnapshot.empty) {
+            showAdminMessage('Tidak ada data untuk diekspor', 'warning');
+            return;
+        }
+        
+        // Prepare CSV content
+        let csvContent = "ID,Jenis Isu,Lokasi,Status,Email Pelapor,Telepon,Tanggal Dibuat,Terakhir Update,Jumlah Foto,Deskripsi\n";
+        
+        querySnapshot.forEach(doc => {
+            const data = doc.data();
+            
+            // Format dates
+            const createdAt = data.createdAt ? 
+                data.createdAt.toDate().toLocaleString('id-ID') : 'Tidak diketahui';
+            const updatedAt = data.updatedAt ? 
+                data.updatedAt.toDate().toLocaleString('id-ID') : 'Tidak pernah';
+            
+            // Escape CSV special characters
+            const escapeCSV = (str) => {
+                if (!str) return '';
+                return `"${String(str).replace(/"/g, '""')}"`;
+            };
+            
+            csvContent += [
+                escapeCSV(doc.id),
+                escapeCSV(getIssueTypeLabel(data.type)),
+                escapeCSV(data.location),
+                escapeCSV(getStatusLabel(data.status)),
+                escapeCSV(data.reporterEmail),
+                escapeCSV(data.reporterPhone),
+                escapeCSV(createdAt),
+                escapeCSV(updatedAt),
+                escapeCSV(data.photoCount || 0),
+                escapeCSV(data.description)
+            ].join(',') + '\n';
+        });
+        
+        // Create and download CSV file
+        const blob = new Blob(['\uFEFF' + csvContent], { 
+            type: 'text/csv;charset=utf-8;' 
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        const timestamp = new Date().toISOString().split('T')[0];
+        
+        link.href = url;
+        link.download = `laporan-lingkungan-${timestamp}.csv`;
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        showAdminMessage(`Data berhasil diekspor (${querySnapshot.size} laporan)`, 'success');
+        
+    } catch (error) {
+        console.error('Export error:', error);
+        showAdminMessage('Gagal mengekspor data: ' + error.message, 'error');
+    } finally {
+        // Restore button state
+        exportBtn.innerHTML = originalHTML;
+        exportBtn.disabled = false;
+    }
+});
     </script>
+    <!-- Tambahkan sebelum </body> di admin.html -->
+<div class="modal" id="adminModal">
+    <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-header">
+            <h2 id="modalTitle">Detail Laporan</h2>
+            <button class="close-modal" onclick="closeAdminModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <!-- Content akan diisi oleh JavaScript -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // Enhanced animations and interactions
+document.addEventListener('DOMContentLoaded', function() {
+    // Add loading animation
+    const cards = document.querySelectorAll('.analytics-card, .settings-card, .table-container');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+    });
+    
+    // Enhanced table row animations
+    const tableRows = document.querySelectorAll('.issues-table tbody tr');
+    tableRows.forEach((row, index) => {
+        row.style.animationDelay = `${index * 0.05}s`;
+        row.classList.add('fade-in');
+    });
+    
+    // Floating action button functionality
+    const fab = document.getElementById('mobileMenuBtn');
+    if (fab) {
+        fab.addEventListener('click', function() {
+            // Scroll to top or show quick actions
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+    
+    // Add parallax effect to admin header
+    window.addEventListener('scroll', function() {
+        const scrolled = window.pageYOffset;
+        const parallax = document.querySelector('.admin-header');
+        if (parallax) {
+            parallax.style.transform = `translateY(${scrolled * 0.5}px)`;
+        }
+    });
+});
+
+// Add CSS for fade-in animation
+const style = document.createElement('style');
+style.textContent = `
+    .fade-in {
+        animation: fadeInUp 0.5s ease-out both;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Hover effects for cards */
+    .analytics-card:hover .stat-value,
+    .settings-card:hover h3 {
+        transform: scale(1.05);
+        transition: transform 0.3s ease;
+    }
+    
+    /* Pulse animation for notifications */
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    .badge {
+        animation: pulse 2s infinite;
+    }
+`;
+document.head.appendChild(style);
+    // Enhanced Admin Functions
+    async function viewIssue(issueId) {
+        try {
+            const doc = await db.collection('issues').doc(issueId).get();
+            if (doc.exists) {
+                const data = doc.data();
+                
+                // Format modal content
+                const modalContent = `
+                    <div class="issue-detail-modal">
+                        <div class="detail-section">
+                            <h3>Informasi Laporan</h3>
+                            <div class="detail-grid">
+                                <div class="detail-item">
+                                    <label>ID Laporan:</label>
+                                    <span>${issueId}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <label>Jenis Isu:</label>
+                                    <span>${getIssueTypeLabel(data.type)}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <label>Status:</label>
+                                    <span class="status-badge status-${data.status}">${getStatusLabel(data.status)}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <label>Lokasi:</label>
+                                    <span>${data.location || 'Tidak ada lokasi'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <label>Email Pelapor:</label>
+                                    <span>${data.reporterEmail || 'Tidak ada email'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <label>Telepon:</label>
+                                    <span>${data.reporterPhone || 'Tidak ada telepon'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <label>Tanggal Dibuat:</label>
+                                    <span>${data.createdAt ? data.createdAt.toDate().toLocaleString('id-ID') : 'Tidak diketahui'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <label>Terakhir Diupdate:</label>
+                                    <span>${data.updatedAt ? data.updatedAt.toDate().toLocaleString('id-ID') : 'Tidak pernah'}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <h3>Deskripsi</h3>
+                            <div class="description-box">
+                                ${data.description || 'Tidak ada deskripsi'}
+                            </div>
+                        </div>
+                        
+                        ${data.photoBase64 && data.photoBase64.length > 0 ? `
+                        <div class="detail-section">
+                            <h3>Foto Bukti (${data.photoBase64.length})</h3>
+                            <div class="photo-gallery-admin">
+                                ${data.photoBase64.map((photo, index) => `
+                                    <div class="admin-photo-item">
+                                        <img src="${photo}" alt="Foto bukti ${index + 1}" onclick="openAdminPhotoModal('${photo}')">
+                                        <span class="photo-number">${index + 1}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        <div class="modal-actions">
+                            <button class="btn btn-primary" onclick="closeAdminModal()">Tutup</button>
+                            <button class="btn btn-success" onclick="updateIssueStatus('${issueId}')">Update Status</button>
+                        </div>
+                    </div>
+                `;
+                
+                // Show modal
+                document.getElementById('modalTitle').textContent = 'Detail Laporan';
+                document.getElementById('modalBody').innerHTML = modalContent;
+                document.getElementById('adminModal').style.display = 'flex';
+                
+            } else {
+                alert('Laporan tidak ditemukan!');
+            }
+        } catch (error) {
+            console.error('Error viewing issue:', error);
+            alert('Error: ' + error.message);
+        }
+    }
+
+    async function updateIssueStatus(issueId) {
+        try {
+            const doc = await db.collection('issues').doc(issueId).get();
+            if (!doc.exists) {
+                alert('Laporan tidak ditemukan!');
+                return;
+            }
+            
+            const currentStatus = doc.data().status || 'new';
+            const newStatus = prompt(
+                'Update Status Laporan:\n\n' +
+                'new - Baru\n' +
+                'in-progress - Sedang Diproses\n' +
+                'completed - Selesai\n\n' +
+                'Status saat ini: ' + getStatusLabel(currentStatus),
+                currentStatus
+            );
+            
+            if (newStatus && ['new', 'in-progress', 'completed'].includes(newStatus)) {
+                await db.collection('issues').doc(issueId).update({
+                    status: newStatus,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                showAdminMessage('Status berhasil diupdate!', 'success');
+                loadAdminIssues();
+                closeAdminModal();
+                
+            } else if (newStatus) {
+                alert('Status tidak valid! Gunakan: new, in-progress, atau completed');
+            }
+            
+        } catch (error) {
+            console.error('Error updating status:', error);
+            alert('Error: ' + error.message);
+        }
+    }
+
+    async function deleteIssue(issueId) {
+        if (confirm(`Yakin ingin menghapus laporan ${issueId}?\n\nTindakan ini tidak dapat dibatalkan!`)) {
+            try {
+                await db.collection('issues').doc(issueId).delete();
+                showAdminMessage('Laporan berhasil dihapus!', 'success');
+                loadAdminIssues();
+            } catch (error) {
+                console.error('Error deleting issue:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+    }
+
+    function closeAdminModal() {
+        document.getElementById('adminModal').style.display = 'none';
+    }
+
+    function openAdminPhotoModal(photoBase64) {
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            cursor: pointer;
+        `;
+        
+        modal.innerHTML = `
+            <div style="position: relative; max-width: 95%; max-height: 95%;">
+                <img src="${photoBase64}" style="max-width: 100%; max-height: 95vh; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                <button onclick="this.parentElement.parentElement.remove()" 
+                        style="position: absolute; top: -50px; right: 0; background: var(--danger); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;">
+                    ×
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    }
+
+    // Helper functions
+    function getIssueTypeLabel(type) {
+        const types = {
+            'trash': 'Sampah Liar',
+            'water': 'Polusi Air', 
+            'facility': 'Kerusakan Fasilitas',
+            'tree': 'Pohon Tumbang'
+        };
+        return types[type] || type || 'Tidak Diketahui';
+    }
+
+    function getStatusLabel(status) {
+        const statuses = {
+            'new': 'Baru',
+            'in-progress': 'Sedang Diproses',
+            'completed': 'Selesai'
+        };
+        return statuses[status] || status || 'Tidak Diketahui';
+    }
+
+    function showAdminMessage(message, type = 'info') {
+        const messageDiv = document.createElement('div');
+        messageDiv.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            padding: 1rem;
+            border-radius: 8px;
+            color: white;
+            z-index: 10000;
+            max-width: 300px;
+            box-shadow: var(--shadow-lg);
+        `;
+        
+        const bgColors = {
+            'success': 'var(--success)',
+            'error': 'var(--danger)', 
+            'warning': 'var(--warning)',
+            'info': 'var(--primary)'
+        };
+        
+        messageDiv.style.backgroundColor = bgColors[type] || bgColors.info;
+        messageDiv.innerHTML = `<div style="display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'}"></i>
+            <span>${message}</span>
+        </div>`;
+        
+        document.body.appendChild(messageDiv);
+        
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.parentNode.removeChild(messageDiv);
+            }
+        }, 4000);
+    }
+
+    // Make functions global
+    window.viewIssue = viewIssue;
+    window.updateIssueStatus = updateIssueStatus;
+    window.deleteIssue = deleteIssue;
+    window.closeAdminModal = closeAdminModal;
+    window.openAdminPhotoModal = openAdminPhotoModal;
+</script>
+<!-- Floating Action Button for Mobile -->
+<button class="floating-action-btn" id="mobileMenuBtn" title="Menu Utama">
+    <i class="fas fa-bars"></i>
+</button>
 </body>
 </html>
