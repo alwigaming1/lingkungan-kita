@@ -1,8 +1,8 @@
 // user-app.js - Dengan Base64 Photo Upload (GRATIS)
 console.log("=== LINGKUNGAN KITA - WITH PHOTO UPLOAD ===");
 
-// Initialize map
-const map = L.map('map').setView([-6.2088, 106.8456], 13);
+// Initialize map - Bulukumba Center
+const map = L.map('map').setView([-5.5576, 120.1963], 11); // Koordinat Bulukumba
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
@@ -14,6 +14,11 @@ const statusColors = {
     'completed': 'green'
 };
 
+// === FILTER FUNCTIONALITY ===
+let currentFilters = {
+    status: ['new', 'in-progress', 'completed'],
+    type: ['trash', 'water', 'facility', 'tree']
+};
 // Load issues dari Firebase
 async function loadIssues() {
     try {
@@ -69,11 +74,173 @@ async function loadIssues() {
     }
 }
 
+// Initialize filter event listeners
+function initializeFilters() {
+    console.log("🔧 Initializing filters...");
+    
+    // Status filters
+    const statusFilters = ['filter-new', 'filter-in-progress', 'filter-completed'];
+    statusFilters.forEach(filterId => {
+        const element = document.getElementById(filterId);
+        if (element) {
+            element.addEventListener('change', updateStatusFilter);
+        }
+    });
+    
+    // Type filters
+    const typeFilters = ['type-trash', 'type-water', 'type-facility', 'type-tree'];
+    typeFilters.forEach(filterId => {
+        const element = document.getElementById(filterId);
+        if (element) {
+            element.addEventListener('change', updateTypeFilter);
+        }
+    });
+    
+    console.log("✅ Filters initialized");
+}
+
+// Update status filter
+function updateStatusFilter(e) {
+    const status = e.target.id.replace('filter-', '');
+    
+    if (e.target.checked) {
+        if (!currentFilters.status.includes(status)) {
+            currentFilters.status.push(status);
+        }
+    } else {
+        currentFilters.status = currentFilters.status.filter(s => s !== status);
+    }
+    
+    applyFilters();
+}
+
+// Update type filter
+function updateTypeFilter(e) {
+    const type = e.target.id.replace('type-', '');
+    
+    if (e.target.checked) {
+        if (!currentFilters.type.includes(type)) {
+            currentFilters.type.push(type);
+        }
+    } else {
+        currentFilters.type = currentFilters.type.filter(t => t !== type);
+    }
+    
+    applyFilters();
+}
+
+// Apply filters to issues
+function applyFilters() {
+    const issueCards = document.querySelectorAll('.issue-card');
+    let visibleCount = 0;
+    
+    issueCards.forEach(card => {
+        const status = card.getAttribute('data-status') || 'new';
+        const type = card.getAttribute('data-type') || 'trash';
+        
+        const shouldShow = currentFilters.status.includes(status) && currentFilters.type.includes(type);
+        
+        if (shouldShow) {
+            card.style.display = 'block';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    updateVisibleCount(visibleCount);
+    updateMapMarkers();
+}
+
+// Update visible count display - Compact version
+function updateVisibleCount(count) {
+    const issuesList = document.getElementById('issuesList');
+    let countElement = issuesList.querySelector('.visible-count');
+    
+    if (!countElement) {
+        countElement = document.createElement('div');
+        countElement.className = 'visible-count';
+        issuesList.insertBefore(countElement, issuesList.firstChild);
+    }
+    
+    if (count > 0) {
+        countElement.innerHTML = `
+            <i class="fas fa-filter"></i>
+            <span>Menampilkan <strong>${count}</strong> laporan</span>
+        `;
+    } else {
+        countElement.innerHTML = `
+            <i class="fas fa-search"></i>
+            <span>Tidak ada laporan yang sesuai filter</span>
+        `;
+        countElement.classList.add('no-results');
+    }
+    
+    countElement.style.display = 'block';
+}
+// Update map markers based on filters
+function updateMapMarkers() {
+    // Clear all markers
+    map.eachLayer((layer) => {
+        if (layer instanceof L.Marker) {
+            map.removeLayer(layer);
+        }
+    });
+    
+    // Add back only visible markers
+    const visibleCards = document.querySelectorAll('.issue-card[style="display: block"]');
+    visibleCards.forEach(card => {
+        const issueId = card.getAttribute('data-id');
+        // You might need to store issue data to recreate markers
+        // This is a simplified version
+    });
+}
+
+// Reset filters to show all
+function resetFilters() {
+    // Reset checkbox states
+    document.getElementById('filter-new').checked = true;
+    document.getElementById('filter-in-progress').checked = true;
+    document.getElementById('filter-completed').checked = true;
+    
+    document.getElementById('type-trash').checked = true;
+    document.getElementById('type-water').checked = true;
+    document.getElementById('type-facility').checked = true;
+    document.getElementById('type-tree').checked = true;
+    
+    // Reset filter object
+    currentFilters = {
+        status: ['new', 'in-progress', 'completed'],
+        type: ['trash', 'water', 'facility', 'tree']
+    };
+    
+    applyFilters();
+}
+
+// Add reset filter button
+function addResetFilterButton() {
+    const firstFilterSection = document.querySelector('.filter-section');
+    if (firstFilterSection && !document.getElementById('resetFilterBtn')) {
+        const resetBtn = document.createElement('button');
+        resetBtn.id = 'resetFilterBtn';
+        resetBtn.className = 'btn btn-outline btn-sm';
+        resetBtn.innerHTML = '<i class="fas fa-redo"></i> Reset Filter';
+        resetBtn.style.marginTop = '1rem';
+        resetBtn.style.width = '100%';
+        resetBtn.addEventListener('click', resetFilters);
+        
+        firstFilterSection.appendChild(resetBtn);
+    }
+}
+
 // Display issue di list
 function displayIssue(issue) {
     const issuesList = document.getElementById('issuesList');
     const issueCard = document.createElement('div');
     issueCard.className = 'issue-card';
+    issueCard.setAttribute('data-status', issue.status);
+    issueCard.setAttribute('data-type', issue.type);
+    issueCard.setAttribute('data-id', issue.id);
     
     // Photo badge jika ada foto
     let photosHTML = '';
@@ -705,7 +872,8 @@ let locationMarker = null;
 function initLocationMap() {
     if (!document.getElementById('locationMap')) return;
     
-    locationMap = L.map('locationMap').setView([-6.2088, 106.8456], 13);
+    // Set center ke Bulukumba
+    locationMap = L.map('locationMap').setView([-5.5576, 120.1963], 12);
     
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -734,6 +902,7 @@ document.getElementById('useCurrentLocation')?.addEventListener('click', functio
             const lat = position.coords.latitude;
             const lng = position.coords.longitude;
             
+            // Set view ke lokasi user, tapi tetap dalam area Bulukumba
             locationMap.setView([lat, lng], 15);
             
             if (locationMarker) {
@@ -747,12 +916,14 @@ document.getElementById('useCurrentLocation')?.addEventListener('click', functio
             showMessage('Lokasi berhasil dideteksi!', 'success');
         }, function(error) {
             console.error('Geolocation error:', error);
-            showMessage('Tidak dapat mengakses lokasi. Pastikan izin lokasi diaktifkan.', 'error');
+            // Fallback ke Bulukumba center jika geolocation gagal
+            locationMap.setView([-5.5576, 120.1963], 12);
+            showMessage('Menggunakan peta Bulukumba. Pastikan izin lokasi diaktifkan untuk deteksi otomatis.', 'warning');
             btn.innerHTML = originalText;
             btn.disabled = false;
         });
     } else {
-        showMessage('Browser tidak mendukung geolocation.', 'error');
+        showMessage('Browser tidak mendukung geolocation. Menggunakan peta Bulukumba.', 'warning');
     }
 });
 
@@ -917,6 +1088,12 @@ document.head.appendChild(style);
 // Initialize app
 document.addEventListener('DOMContentLoaded', function() {
     console.log("🚀 Initializing Lingkungan Kita App...");
+    
+    // Initialize filters first
+    initializeFilters();
+    addResetFilterButton();
+    
+    // Then load issues
     loadIssues();
     
     // Initialize location map when modal opens
